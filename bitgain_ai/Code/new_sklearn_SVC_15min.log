@@ -1,0 +1,96 @@
+root - WARNING - 04/11/19 14:52:09 logging started
+root - WARNING - 04/11/19 14:53:04 logging started
+root - WARNING - 04/11/19 14:55:24 logging started
+alpaca_trade_api.rest - WARNING - sleep 3 seconds and retrying https://data.alpaca.markets/v1/bars/15Min 3 more time(s)...
+alpaca_trade_api.rest - WARNING - sleep 3 seconds and retrying https://data.alpaca.markets/v1/bars/15Min 3 more time(s)...
+alpaca_trade_api.rest - WARNING - sleep 3 seconds and retrying https://data.alpaca.markets/v1/bars/15Min 3 more time(s)...
+alpaca_trade_api.rest - WARNING - sleep 3 seconds and retrying https://data.alpaca.markets/v1/bars/15Min 3 more time(s)...
+alpaca_trade_api.rest - WARNING - sleep 3 seconds and retrying https://data.alpaca.markets/v1/bars/15Min 3 more time(s)...
+alpaca_trade_api.rest - WARNING - sleep 3 seconds and retrying https://data.alpaca.markets/v1/bars/15Min 3 more time(s)...
+root - WARNING - 04/11/19 15:01:38 logging started
+root - WARNING - 04/11/19 15:03:47 logging started
+root - WARNING - 04/11/19 15:05:50 logging started
+root - WARNING - 04/11/19 15:06:02 AJG - 13.0
+root - WARNING - 04/11/19 15:06:03 ALB - 12.0
+root - WARNING - 04/11/19 15:06:07 AME - 12.0
+root - WARNING - 04/11/19 15:06:14 APD - 5.0
+root - WARNING - 04/11/19 15:06:17 ATVI - 21.0
+root - WARNING - 04/11/19 15:06:20 AXP - 9.0
+root - WARNING - 04/11/19 15:06:23 BBY - 14.0
+root - WARNING - 04/11/19 15:06:28 BR - 9.0
+root - WARNING - 04/11/19 15:06:37 CERN - 16.0
+root - WARNING - 04/11/19 15:06:48 COST - 4.0
+root - WARNING - 04/11/19 15:06:59 DISCA - 33.0
+root - WARNING - 04/11/19 15:07:10 EQIX - 2.0
+root - WARNING - 04/11/19 15:07:16 EXR - 10.0
+root - WARNING - 04/11/19 15:07:17 FAST - 15.0
+root - WARNING - 04/11/19 15:07:18 FB - 6.0
+root - WARNING - 04/11/19 15:07:21 FISV - 12.0
+root - WARNING - 04/11/19 15:07:25 FOX - 28.0
+root - WARNING - 04/11/19 15:07:26 FRC - 10.0
+root - WARNING - 04/11/19 15:07:32 GOOGL - 1.0
+root - WARNING - 04/11/19 15:07:42 HON - 6.0
+root - WARNING - 04/11/19 15:07:53 IPGP - 6.0
+root - WARNING - 04/11/19 15:08:03 KMB - 8.0
+root - WARNING - 04/11/19 15:08:13 LRCX - 5.0
+root - WARNING - 04/11/19 15:08:28 MSCI - 5.0
+root - WARNING - 04/11/19 15:08:29 MSI - 7.0
+root - WARNING - 04/11/19 15:08:35 NKE - 12.0
+root - WARNING - 04/11/19 15:08:45 PAYX - 12.0
+root - WARNING - 04/11/19 15:08:46 PEG - 17.0
+root - WARNING - 04/11/19 15:08:47 PEP - 8.0
+root - WARNING - 04/11/19 15:08:48 PFE - 24.0
+root - WARNING - 04/11/19 15:08:56 PSX - 10.0
+root - WARNING - 04/11/19 15:08:58 PYPL - 9.0
+root - WARNING - 04/11/19 15:09:02 RHI - 15.0
+root - WARNING - 04/11/19 15:09:04 RMD - 10.0
+root - WARNING - 04/11/19 15:09:06 ROST - 10.0
+root - WARNING - 04/11/19 15:09:09 SEE - 21.0
+root - WARNING - 04/11/19 15:09:12 SNPS - 8.0
+root - WARNING - 04/11/19 15:09:25 TRIP - 19.0
+root - WARNING - 04/11/19 15:09:27 TSN - 14.0
+root - WARNING - 04/11/19 15:09:32 UDR - 22.0
+root - WARNING - 04/11/19 15:09:33 ULTA - 3.0
+root - WARNING - 04/11/19 15:09:35 URI - 8.0
+root - WARNING - 04/11/19 15:09:39 VMC - 8.0
+root - WARNING - 04/11/19 15:09:43 WAT - 4.0
+root - WARNING - 04/11/19 15:24:56 A - 12.0
+root - WARNING - 04/11/19 15:24:58 AAPL - 5.0
+root - WARNING - 04/11/19 15:25:09 ALB - 12.0
+root - WARNING - 04/11/19 15:25:15 AMT - 5.0
+root - WARNING - 04/11/19 15:25:16 ANET - 3.0
+root - WARNING - 04/11/19 15:25:23 ATVI - 21.0
+root - WARNING - 04/11/19 15:25:24 AVGO - 3.0
+root - WARNING - 04/11/19 15:25:29 BBY - 14.0
+root - WARNING - 04/11/19 15:25:30 BF.B - 19.0
+root - WARNING - 04/11/19 15:25:35 BR - 9.0
+root - WARNING - 04/11/19 15:25:45 CHD - 14.0
+root - WARNING - 04/11/19 15:25:51 CMS - 18.0
+root - WARNING - 04/11/19 15:26:05 DGX - 11.0
+root - WARNING - 04/11/19 15:26:20 EQIX - 2.0
+root - WARNING - 04/11/19 15:26:26 EXR - 10.0
+root - WARNING - 04/11/19 15:26:28 FB - 6.0
+root - WARNING - 04/11/19 15:26:35 FOX - 28.0
+root - WARNING - 04/11/19 15:26:36 FRC - 10.0
+root - WARNING - 04/11/19 15:27:03 IPGP - 6.0
+root - WARNING - 04/11/19 15:27:15 KMB - 8.0
+root - WARNING - 04/11/19 15:27:22 LLL - 5.0
+root - WARNING - 04/11/19 15:27:30 MAT - 74.0
+root - WARNING - 04/11/19 15:27:33 MDT - 11.0
+root - WARNING - 04/11/19 15:27:37 MO - 18.0
+root - WARNING - 04/11/19 15:27:39 MRK - 13.0
+root - WARNING - 04/11/19 15:27:41 MSI - 7.0
+root - WARNING - 04/11/19 15:27:42 MTB - 6.0
+root - WARNING - 04/11/19 15:27:46 NEM - 28.0
+root - WARNING - 04/11/19 15:28:07 PNW - 11.0
+root - WARNING - 04/11/19 15:28:19 ROP - 3.0
+root - WARNING - 04/11/19 15:28:20 ROST - 10.0
+root - WARNING - 04/11/19 15:28:23 SEE - 21.0
+root - WARNING - 04/11/19 15:28:26 SNPS - 8.0
+root - WARNING - 04/11/19 15:28:28 SRE - 8.0
+root - WARNING - 04/11/19 15:28:36 TIF - 9.0
+root - WARNING - 04/11/19 15:28:41 TSN - 14.0
+root - WARNING - 04/11/19 15:28:49 URI - 8.0
+root - WARNING - 04/11/19 15:28:54 VRSK - 7.0
+root - WARNING - 04/11/19 15:28:56 WAB - 13.0
+root - WARNING - 04/11/19 15:29:03 WU - 52.0

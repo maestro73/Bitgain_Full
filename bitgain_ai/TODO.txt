@@ -1,0 +1,32 @@
+TODO:
+
+Normal
+Improve data process
+  - Add more features
+	- Technical indicators
+	- Mean reverting indicators
+		- Speed of reverting
+		- Size of reverting 
+		- Etc.
+  - Select best features (simple model -> better)
+	- Permutation Importance
+	- Random Forest Estimation
+  - Add longer look-back period
+
+Improve machine learning algorithm
+  - Select best base model
+	- Will probably be a neural net or boosted forest
+  - Tune hyper parameters that create best model based on what results
+	- Sharpe ratio
+	- Risk adjusted returns
+	- Overall return
+  - Change model from 0 or 1 to a confidence interval from -1 to 1
+	- Buy/sell that amount of stock * a multiple (optimized)
+  - Use quasi cross-validation by using Time-Series split in scikit-learn
+  - Train and validate the model in a separate process then save the final model
+	- Use this model to predict buy/sell (quicker while trading and more robust)
+
+Advanced
+Create risk management overlay
+  - Additional signal to buy/sell which lets you know if performing an order will have too    	much affect on portfolio risk
+

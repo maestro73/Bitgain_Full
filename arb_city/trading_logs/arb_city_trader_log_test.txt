@@ -1,0 +1,2 @@
+epoch, message, open/close, buy_side, sell_side, buy_price, sell_price
+1568134792.949172, Trade Opened, Open, Deribit, Bitmex, 10304.5, 10813.5
