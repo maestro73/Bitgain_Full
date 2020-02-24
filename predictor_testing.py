@@ -1,3 +1,4 @@
+# pylint: disable=no-member, anomalous-backslash-in-string
 import re, tweepy, talib, datetime, requests 
 from tweepy import OAuthHandler 
 from textblob import TextBlob 
