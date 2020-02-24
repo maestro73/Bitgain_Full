@@ -3,6 +3,8 @@ import tweepy
 from tweepy import OAuthHandler 
 from textblob import TextBlob 
 from objbrowser import browse
+from pprint import pprint
+import datetime
 
 rounding = 4
   
@@ -72,7 +74,8 @@ class TwitterClient(object):
                 # saving text of tweet 
                 parsed_tweet['text'] = tweet.text 
                 # saving sentiment of tweet 
-                parsed_tweet['sentiment'] = self.get_tweet_sentiment(tweet.text) 
+                parsed_tweet['sentiment'] = self.get_tweet_sentiment(tweet.text)
+                parsed_tweet['created'] = tweet.created_at
   
                 # appending parsed tweet to tweets list 
                 if tweet.retweet_count > 0: 
@@ -124,4 +127,25 @@ def main():
     
 if __name__ == "__main__": 
     # calling main function 
-    main() 
+    #main()
+    client = TwitterClient()
+
+    #tweets = client.api.search(q = "Bitcoin", count = 1000)
+    tweets = client.get_tweets(query = "Bitcoin", count = 1000)
+    print(tweets[0])
+
+    now = datetime.datetime.now()
+    yesterday = now - datetime.timedelta(1)
+
+    print(type(yesterday))
+
+    '''
+    if tweets[0]['created'] > datetime.datetime.now():
+        print(f"Datetime older is greater")
+    else:
+        print("Datetime younger is greater")
+    '''
+    #pprint(type(tweets[0]))
+    #pprint(len(tweets[0]))
+    #pprint(dir(tweets[0]))
+    #pprint(tweets[0].__dict__['created_at'])
