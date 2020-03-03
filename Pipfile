@@ -9,6 +9,10 @@ verify_ssl = true
 ta-lib = {path = "U:/Docs/Whls/TA_Lib-0.4.17-cp37-cp37m-win_amd64.whl"}
 tensorflow = "*"
 pylint = "*"
+tweepy = "*"
+textblob = "*"
+pandas = "*"
+sklearn = "*"
 
 [requires]
 python_version = "3.7"
