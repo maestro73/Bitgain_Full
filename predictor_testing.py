@@ -14,7 +14,7 @@ rounding = 4
 
 class BitgainPredictor(object):
 
-    def __init__(self):
+    def __init__(self, retrain=False):
         # keys and tokens from the Twitter Dev Console 
         consumer_key = 'Ih2mlq5lsnqc9GEmgrkcoz8wj'
         consumer_secret = 'gr7tMB0QHlwqrL5f28YfzT5IDKsbRc9jyyqTIg0eRCrl29AzCJ'
@@ -33,6 +33,8 @@ class BitgainPredictor(object):
             print("Error: Authentication Failed") 
 
         self.normalizer = Normalizer() # scikit-learn normalizer
+
+        self.retrain = retrain
 
     def binary_accuracy_(self, y_test, y_hat_scaled):
         count = 0
