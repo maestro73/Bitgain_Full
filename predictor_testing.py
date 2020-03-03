@@ -261,6 +261,9 @@ class BitgainPredictor(object):
         except tweepy.TweepError as e:
             print(f"TweepyError: {str(e)}")
 
+    def backtest_results(self):
+        pass
+
 def run_main():
     
     client = BitgainPredictor()
