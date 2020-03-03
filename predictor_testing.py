@@ -78,7 +78,6 @@ class BitgainPredictor(object):
         except tweepy.TweepError as e:
             print(f"TweepyError: {str(e)}")
 
-
     def get_tweet_sentiment(self, tweet):
         clean_tweet = ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split())
         analysis = TextBlob(clean_tweet)
