@@ -168,9 +168,9 @@ class BitgainPredictor(object):
         self.model = tf.keras.Sequential()
         #self.model.add(tf.keras.layers.Dense(12, input_shape=(x_train.shape[1],x_train.shape[2])))
         #self.model.add(tf.keras.layers.Dropout(0.2))
-        self.model.add(tf.keras.layers.LSTM(12, return_sequences=True, input_shape=(self.x_train.shape[1],self.x_train.shape[2])))
-        self.model.add(tf.keras.layers.LSTM(12, return_sequences=True))
-        self.model.add(tf.keras.layers.LSTM(12, return_sequences=False))
+        self.model.add(tf.keras.layers.LSTM(12, return_sequences=False, input_shape=(self.x_train.shape[1],self.x_train.shape[2])))
+        #self.model.add(tf.keras.layers.LSTM(12, return_sequences=True))
+        #self.model.add(tf.keras.layers.LSTM(12, return_sequences=False))
         #self.model.add(tf.keras.layers.LSTM(12, return_sequences=True))
         #self.model.add(tf.keras.layers.Dropout(0.1))
         #self.model.add(tf.keras.layers.LSTM(12, return_sequences=False))
@@ -267,6 +267,11 @@ class BitgainPredictor(object):
             print(f"TweepyError: {str(e)}")
 
     def backtest_results(self):
+        '''
+        1. Get closing-change values of matching rows to y-test & y-pred
+        2. Do math (starting with $1000) on returns if y-pred is followed
+        3. Find results both with and w/o shorting as an option
+        '''
         pass
 
 def run_main():
