@@ -2,7 +2,7 @@
 import re, tweepy, talib, datetime, requests 
 from tweepy import OAuthHandler 
 from textblob import TextBlob 
-from objbrowser import browse
+#from objbrowser import browse
 from pprint import pprint
 import pandas as pd
 import numpy as np
@@ -14,7 +14,7 @@ rounding = 4
 
 class BitgainPredictor(object):
 
-    def __init__(self):
+    def __init__(self, retrain=False):
         # keys and tokens from the Twitter Dev Console 
         consumer_key = 'Ih2mlq5lsnqc9GEmgrkcoz8wj'
         consumer_secret = 'gr7tMB0QHlwqrL5f28YfzT5IDKsbRc9jyyqTIg0eRCrl29AzCJ'
@@ -33,6 +33,8 @@ class BitgainPredictor(object):
             print("Error: Authentication Failed") 
 
         self.normalizer = Normalizer() # scikit-learn normalizer
+
+        self.retrain = retrain
 
     def binary_accuracy_(self, y_test, y_hat_scaled):
         count = 0
@@ -76,7 +78,6 @@ class BitgainPredictor(object):
         except tweepy.TweepError as e:
             print(f"TweepyError: {str(e)}")
 
-
     def get_tweet_sentiment(self, tweet):
         clean_tweet = ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split())
         analysis = TextBlob(clean_tweet)
@@ -90,13 +91,16 @@ class BitgainPredictor(object):
 
     def get_bitstamp_usd_minutely_price_data(self, data_path = "bitcoin_ticker.csv"):
         # "https://raw.githubusercontent.com/curiousily/Deep-Learning-For-Hackers/master/data/3.stock-prediction/BTC-USD.csv"
-        df_minutely = pd.read_csv(data_path, parse_dates=['datetime_id']) # loads locally saved data_path (original copy found at github link above)
+        try:
+            df_minutely = pd.read_csv(data_path, parse_dates=['datetime_id']) # loads locally saved data_path (original copy found at github link above)
+        except:
+            print("Local data load failed... trying github download")
+            df_minutely = pd.read_csv("https://raw.githubusercontent.com/curiousily/Deep-Learning-For-Hackers/master/data/3.stock-prediction/BTC-USD.csv", parse_dates=['datetime_id']) # loads locally saved data_path (original copy found at github link above)
 
         df_bitstamp_usd = df_minutely.loc[df_minutely['market'] == 'bitstamp'] # filters for only bitstamp market
         df_bitstamp_usd = df_bitstamp_usd.loc[df_bitstamp_usd['rpt_key'] == 'btc_usd'] # filters for only btc/usd pair
         df_bitstamp_usd = df_bitstamp_usd.drop(['updated_at', 'date_id', 'created_at', 'market', 'rpt_key'], axis=1) # drop misc columns
         self.df_bitstamp_usd = df_bitstamp_usd.sort_values("datetime_id").reset_index(drop=True)#.drop('index', axis=1) # resets index numbering
-        #return df_bitstamp_usd
 
     def get_indicators_from_price_data(self):
 
@@ -163,9 +167,9 @@ class BitgainPredictor(object):
         self.model = tf.keras.Sequential()
         #self.model.add(tf.keras.layers.Dense(12, input_shape=(x_train.shape[1],x_train.shape[2])))
         #self.model.add(tf.keras.layers.Dropout(0.2))
-        self.model.add(tf.keras.layers.LSTM(12, return_sequences=True, input_shape=(self.x_train.shape[1],self.x_train.shape[2])))
-        self.model.add(tf.keras.layers.LSTM(12, return_sequences=True))
-        self.model.add(tf.keras.layers.LSTM(12, return_sequences=False))
+        self.model.add(tf.keras.layers.LSTM(12, return_sequences=False, input_shape=(self.x_train.shape[1],self.x_train.shape[2])))
+        #self.model.add(tf.keras.layers.LSTM(12, return_sequences=True))
+        #self.model.add(tf.keras.layers.LSTM(12, return_sequences=False))
         #self.model.add(tf.keras.layers.LSTM(12, return_sequences=True))
         #self.model.add(tf.keras.layers.Dropout(0.1))
         #self.model.add(tf.keras.layers.LSTM(12, return_sequences=False))
@@ -261,13 +265,29 @@ class BitgainPredictor(object):
         except tweepy.TweepError as e:
             print(f"TweepyError: {str(e)}")
 
+    def backtest_results(self):
+        '''
+        1. Get closing-change values of matching rows to y-test & y-pred
+        2. Do math (starting with $1000) on returns if y-pred is followed
+        3. Find results both with and w/o shorting as an option
+        '''
+        pass
+
 def run_main():
     
     client = BitgainPredictor()
 
-    tweets = client.get_tweets(query = "Bitcoin", count = 1000)
-    tweets = client.filter_tweets_by_time(tweets)
-    client.save_tweet_sentiment(tweets)
+    client.get_bitstamp_usd_minutely_price_data()
+    client.get_indicators_from_price_data()
+    client.transform_indicators_to_lstm_format()
+    client.build_model()
+    client.train_model()
+    score = client.score_model()
+    print(score)
+
+    #tweets = client.get_tweets(query = "Bitcoin", count = 1000)
+    #tweets = client.filter_tweets_by_time(tweets)
+    #client.save_tweet_sentiment(tweets)
 
     '''
     print(f"First tweet: ", tweets[0])
@@ -282,15 +302,6 @@ def run_main():
     print(f"First filtered tweet: ", filtered_tweets[0])
     print(f"Last filtered tweet: ", filtered_tweets[-1])
 
-    '''
-
-    '''
-    client.get_bitstamp_usd_minutely_price_data()
-    client.get_indicators_from_price_data()
-    client.transform_indicators_to_lstm_format()
-    client.build_model()
-    client.train_model()
-    client.score_model()
     '''
 
     '''
