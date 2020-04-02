@@ -9,6 +9,8 @@ import numpy as np
 from sklearn.preprocessing import Normalizer
 import tensorflow as tf
 import time
+import ccxt
+from statistics import mean
 
 rounding = 4
 
@@ -36,43 +38,49 @@ class BitgainPredictor(object):
 
         self.retrain = retrain
 
-    def binary_accuracy_(self, y_test, y_hat_scaled):
+    def yhat_averager(self, y_hat):
+        sum_counter = 0
+        for entry in y_hat:
+            sum_counter = sum_counter + entry[0]
+        self.yhat_average = sum_counter / len(y_hat)
+
+    def binary_accuracy_(self, y_test, y_hat):
         count = 0
-        if len(y_test) == len(y_hat_scaled):
+        self.yhat_averager(y_hat)
+        if len(y_test) == len(y_hat):
             for i in range(0, y_test.shape[0]):
-                if y_test[i] == 1 and y_hat_scaled[i] >= 0.5:
+                if y_test[i] == 1 and y_hat[i] >= self.yhat_average:
                     count += 1
-                elif y_test[i] == -1 and y_hat_scaled[i] < 0.5:
+                elif y_test[i] == -1 and y_hat[i] < self.yhat_average:
                     count += 1
             print(f"Percent Correct: {count/len(y_test)}")
             return (count/len(y_test))
                     
         else:
-            raise TypeError("Error: please pass 2 arrays of equal length.")
+            raise ValueError("Error: please pass 2 arrays of equal length.")
+
+    def get_latest_minute_timestamp(self):
+        string_to_minute = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        strp_time = datetime.datetime.strptime(string_to_minute, "%Y-%m-%d %H:%M")
+        return(int(strp_time.timestamp()))
 
     def get_tweets(self, query, count = 1000):
-        
         tweets = []
-
         try: 
             fetched_tweets = self.api.search(q = query, count = count)
-
             for tweet in fetched_tweets:
                 parsed_tweet = {}
-
                 parsed_tweet['text'] = tweet.text
                 parsed_tweet['sentiment'], parsed_tweet['sentiment_score'] = self.get_tweet_sentiment(tweet.text)
                 parsed_tweet['datetime'] = tweet.created_at
                 parsed_tweet['retweets_count'] = tweet.retweet_count
                 parsed_tweet['id'] = tweet.id
                 #parsed_tweet['retweets'] = tweet.retweets
-
                 if tweet.retweet_count > 0:
                     if parsed_tweet not in tweets:
                         tweets.append(parsed_tweet)
                 else:
                     tweets.append(parsed_tweet)
-
             return tweets
 
         except tweepy.TweepError as e:
@@ -89,6 +97,21 @@ class BitgainPredictor(object):
         else: 
             return 'neutral', analysis.sentiment.polarity
 
+    def get_ccxt_ohlcv_price_data(self, symbol="BTC/USD", market=ccxt.binanceus, ticks=10000, timestamp_now=None):
+        bitmex = market()
+        results = []
+        if timestamp_now == None:
+            timestamp_now = self.get_latest_minute_timestamp()
+        timestamp_start = (timestamp_now - 60*ticks)
+        print("Getting OHLCV...")
+        for timestamp in range(timestamp_start, timestamp_now, 60000):
+            print(f"Length: {len(results)}")
+            temp_results = bitmex.fetchOHLCV('BTC/USD', limit=1000, since=timestamp*1000)
+            for result in temp_results:
+                results.append(result)
+            time.sleep(1.85)
+        self.price_data = pd.DataFrame(results, columns=["timestamp","open","high","low","last","volume"])
+
     def get_bitstamp_usd_minutely_price_data(self, data_path = "bitcoin_ticker.csv"):
         # "https://raw.githubusercontent.com/curiousily/Deep-Learning-For-Hackers/master/data/3.stock-prediction/BTC-USD.csv"
         try:
@@ -100,11 +123,11 @@ class BitgainPredictor(object):
         df_bitstamp_usd = df_minutely.loc[df_minutely['market'] == 'bitstamp'] # filters for only bitstamp market
         df_bitstamp_usd = df_bitstamp_usd.loc[df_bitstamp_usd['rpt_key'] == 'btc_usd'] # filters for only btc/usd pair
         df_bitstamp_usd = df_bitstamp_usd.drop(['updated_at', 'date_id', 'created_at', 'market', 'rpt_key'], axis=1) # drop misc columns
-        self.df_bitstamp_usd = df_bitstamp_usd.sort_values("datetime_id").reset_index(drop=True)#.drop('index', axis=1) # resets index numbering
+        self.price_data = df_bitstamp_usd.sort_values("datetime_id").reset_index(drop=True)#.drop('index', axis=1) # resets index numbering
 
     def get_indicators_from_price_data(self):
 
-        data = self.df_bitstamp_usd
+        data = self.price_data
 
         close_price = data['last'].values.reshape(-1,1) # extract closing price from dataset in the proper form for scikit normalizer
         close_change_percent = (np.roll(close_price, -1) - close_price) / close_price # calculate price percent change between each timestep
@@ -131,10 +154,12 @@ class BitgainPredictor(object):
 
         self.ta_data = np.array(
             [momentum, relative_strength_index, trix, atr_normalized, absolute_price_oscillator, aroon_oscillator, ultimate_oscillator, williams_oscillator, close_change_clean]).T
+        self.close_price = close_price
+        self.close_change_percent = close_change_percent
 
         #return ta_nparray
 
-    def transform_indicators_to_lstm_format(self, seq_len = 100):
+    def transform_indicators_to_lstm_format(self, seq_len = 100, train_split=0.9):
 
         # TODO: BUG! right now the math is done so that "seq_len" data is cut off from the MOST RECENT DATA
                     # needs to be the opposite! cut off oldest data, not most recent!
@@ -152,7 +177,6 @@ class BitgainPredictor(object):
         #this is equal to "data" below in next cell def_preprocess
         temp_data_np_array = np.array(temp_data_list)
 
-        train_split = 0.8
         num_train_split = int(train_split * temp_data_np_array.shape[0])
 
         self.x_train = temp_data_np_array[:num_train_split, :, :-1]
@@ -161,21 +185,20 @@ class BitgainPredictor(object):
         self.x_test = temp_data_np_array[num_train_split:, :, :-1]
         self.y_test = y_data[num_train_split:-seq_len]
 
-    def build_model(self, seq_len = 100, batch_size = 10):
+        self.close_change_percent_test = self.close_change_percent[num_train_split:-seq_len]
+        self.close_price_test = self.close_price[num_train_split:-seq_len]
+
+    def build_model(self, activation='relu'):
         #opt = tf.keras.optimizers.SGD(lr=0.01, momentum=0.9)
 
         self.model = tf.keras.Sequential()
         #self.model.add(tf.keras.layers.Dense(12, input_shape=(x_train.shape[1],x_train.shape[2])))
         #self.model.add(tf.keras.layers.Dropout(0.2))
-        self.model.add(tf.keras.layers.LSTM(12, return_sequences=False, input_shape=(self.x_train.shape[1],self.x_train.shape[2])))
+        self.model.add(tf.keras.layers.LSTM(50, activation='relu', return_sequences=False, input_shape=(self.x_train.shape[1],self.x_train.shape[2])))
         #self.model.add(tf.keras.layers.LSTM(12, return_sequences=True))
         #self.model.add(tf.keras.layers.LSTM(12, return_sequences=False))
-        #self.model.add(tf.keras.layers.LSTM(12, return_sequences=True))
-        #self.model.add(tf.keras.layers.Dropout(0.1))
-        #self.model.add(tf.keras.layers.LSTM(12, return_sequences=False))
-        #self.model.add(tf.keras.layers.Dropout(0.1))
-        #self.model.add(tf.keras.layers.Dense(12))
-        #self.model.add(tf.keras.layers.Dropout(0.1))
+        self.model.add(tf.keras.layers.Dropout(0.2))
+        #self.model.add(tf.keras.layers.Activation(activation))
         self.model.add(tf.keras.layers.Dense(1))
 
         self.model.compile(
@@ -184,22 +207,25 @@ class BitgainPredictor(object):
             metrics=['binary_accuracy']
         )
 
-    def train_model(self):
+    def train_model(self, epochs=12, batch_size=12, verbose=1):
         self.history = self.model.fit(
             self.x_train,
             self.y_train,
-            verbose=1,
-            epochs=12,
-            batch_size=64,
+            verbose=verbose,
+            epochs=epochs,
+            batch_size=batch_size,
             shuffle=False,
             #validation_split=0.15
         )
 
     def score_model(self):
-        yhat = self.model.predict(self.x_test)
-        scaled_yhat = self.normalizer.fit_transform(yhat)
-        binary_accuracy_percent = self.binary_accuracy_(self.y_test, scaled_yhat)
+        self.yhat_raw = self.model.predict(self.x_test)
+        self.yhat = self.normalizer.fit_transform(self.yhat_raw)
+        binary_accuracy_percent = self.binary_accuracy_(self.y_test, self.yhat_raw)
         return binary_accuracy_percent
+
+    def save_model(self):
+        self.model.save('testing.h5')
 
     def filter_tweets_by_time(self, tweets, minutes = 1):
         while True:
@@ -265,25 +291,52 @@ class BitgainPredictor(object):
         except tweepy.TweepError as e:
             print(f"TweepyError: {str(e)}")
 
-    def backtest_results(self):
-        '''
-        1. Get closing-change values of matching rows to y-test & y-pred
-        2. Do math (starting with $1000) on returns if y-pred is followed
-        3. Find results both with and w/o shorting as an option
-        '''
-        pass
+    def was_trade_made_check(self, buy_or_sell, holding):
+        if buy_or_sell == 'buy' and holding == False:
+            self.trade_count += 1
+        elif buy_or_sell == 'sell' and holding == True:
+            self.trade_count += 1
+
+    def backtest_model(self, shorts=False):
+        capital = 1000
+        reverse_capital = 1000
+        hodl = 1000
+        self.trade_count = 0
+        holding = False
+        yhat = self.yhat_raw
+        y_test = self.y_test
+        if len(y_test) == len(yhat):
+            for i in range(len(y_test)):
+                if yhat[i] >= self.yhat_average:
+                    capital = capital * (1 + self.close_change_percent_test[i])
+                    self.was_trade_made_check(buy_or_sell='buy', holding=holding)
+                    holding = True
+                else:
+                    reverse_capital = reverse_capital * (1 + self.close_change_percent_test[i])                    
+                    self.was_trade_made_check(buy_or_sell='sell', holding=holding)
+                    holding = False
+                hodl = hodl * (1 + self.close_change_percent_test[i])
+        else:
+            raise ValueError("length of self.yhat does not match length of self.ytest")
+
+        self.capital = capital
+        self.hodl = hodl
+        print(f"Backtest capital (starting w/ $1000): {capital} on {self.trade_count} trades")
+        print(f"Reverse backtest capital (starting w/ $1000): {reverse_capital}")
+        print(f"HODL capital (starting w/ $1000): {hodl}")
+        print(f"Starting close: {self.close_price_test[0]} /// Ending close: {self.close_price_test[-1]}")
 
 def run_main():
     
     client = BitgainPredictor()
-
-    client.get_bitstamp_usd_minutely_price_data()
+    client.get_ccxt_ohlcv_price_data()
     client.get_indicators_from_price_data()
-    client.transform_indicators_to_lstm_format()
+    client.transform_indicators_to_lstm_format(seq_len=90, train_split=0.98)
     client.build_model()
     client.train_model()
-    score = client.score_model()
-    print(score)
+    client.score_model()
+    #client.save_model()
+    client.backtest_model()
 
     #tweets = client.get_tweets(query = "Bitcoin", count = 1000)
     #tweets = client.filter_tweets_by_time(tweets)
